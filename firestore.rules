@@ -1,0 +1,39 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Stores — public read, owner write ──
+    match /stores/{storeId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null
+        && resource.data.ownerPiUid == request.auth.uid;
+
+      // Products — public read, store owner write
+      match /products/{productId} {
+        allow read: if true;
+        allow write: if request.auth != null
+          && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerPiUid == request.auth.uid;
+      }
+    }
+
+    // ── Orders — buyer or seller can read, server writes only ──
+    match /orders/{orderId} {
+      allow read: if request.auth != null
+        && (resource.data.buyerPiUid == request.auth.uid
+          || get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerPiUid == request.auth.uid);
+      allow write: if false; // Server-side only
+    }
+
+    // ── Download tokens — private, server writes only ──
+    match /download_tokens/{token} {
+      allow read, write: if false; // Server-side only via Admin SDK
+    }
+
+    // ── Platform fees — owner read only, server writes ──
+    match /platform_fees/{feeId} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}

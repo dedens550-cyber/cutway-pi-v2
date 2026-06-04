@@ -1,0 +1,23 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Store covers — public read
+    match /stores/{storeId}/covers/{filename} {
+      allow read: if true;
+      allow write: if false; // Server-side upload only
+    }
+
+    // Product files — NO direct access, served via signed URLs only
+    match /stores/{storeId}/products/{productId}/{filename} {
+      allow read: if false;  // Access only via signed URL from server
+      allow write: if false;
+    }
+
+    // Avatars — public read
+    match /stores/{storeId}/avatar/{filename} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}
