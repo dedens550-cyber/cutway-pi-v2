@@ -52,7 +52,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`\n🚀 Cutway.pi v2 running on port ${PORT}`);
   console.log(`📦 Environment: ${process.env.PI_SANDBOX === 'true' ? 'SANDBOX' : 'PRODUCTION'}`);
   console.log(`💰 Platform fee: ${process.env.PLATFORM_FEE_PI || 1} Pi per transaction\n`);
